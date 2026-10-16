@@ -1,0 +1,1121 @@
+/* =========================================================================
+   JellyRoulette — Estilos
+   =========================================================================
+   Principios:
+   1. NADA de dependencias externas (ni CDNs): todo funciona dentro de la web
+      de Jellyfin, que puede estar en una red sin salida a Internet.
+   2. Tema "camaleón": leemos las variables CSS de Jellyfin 12 (--jf-palette-*)
+      y, si no existen (Jellyfin 10.11 / layout clásico), las deduce el JS
+      muestreando los estilos reales de la interfaz. Así no desentonamos nunca.
+   3. Todo el plugin vive bajo el prefijo de clase .jr- para no pisar ni ser
+      pisado por los estilos de Jellyfin.
+   4. Responsive de verdad: Flexbox para las barras, Grid para la ficha de
+      resultado, y una ruleta cuyo radio/escala se recalculan con el viewport.
+   ========================================================================= */
+
+/* ------------------------------------------------------------------ */
+/* 1. Variables del tema                                               */
+/* ------------------------------------------------------------------ */
+.jr-root {
+    /* Jellyfin 12 (MUI) → valor por defecto razonable si no existe */
+    --jr-accent: var(--jf-palette-primary-main, #00a4dc);
+    --jr-accent-contrast: var(--jf-palette-primary-contrastText, #04121a);
+    --jr-bg: var(--jf-palette-background-default, #101010);
+    --jr-surface: var(--jf-palette-background-paper, #202020);
+    --jr-surface-2: var(--jf-palette-SnackbarContent-bg, #303030);
+    --jr-text: var(--jf-palette-text-primary, #fff);
+    --jr-text-dim: var(--jf-palette-text-secondary, rgba(255, 255, 255, .72));
+    --jr-divider: var(--jf-palette-divider, rgba(255, 255, 255, .14));
+    --jr-hover: var(--jf-palette-action-hover, rgba(255, 255, 255, .08));
+    --jr-focus: var(--jf-palette-action-focus, rgba(255, 255, 255, .14));
+    --jr-radius: .5rem;
+    --jr-radius-lg: 1rem;
+
+    /* Sombras y velos (fijos: funcionan sobre cualquier tema) */
+    --jr-veil: rgba(6, 8, 12, .78);
+    --jr-shadow: 0 18px 48px rgba(0, 0, 0, .55);
+
+    /* Tamaños de la ruleta: los calcula el JS según el viewport */
+    --jr-card-w: 132px;
+    --jr-card-h: 198px;
+    --jr-ring-radius: 520px;
+    --jr-ring-scale: 1;
+    --jr-tilt: -7deg;
+    --jr-angle: 0deg;
+
+    /* Colores de acento "casino" (solo detalles, nunca el fondo) */
+    --jr-gold: #f4c95d;
+    --jr-gold-dim: #b8912f;
+}
+
+/* Versiones claras de los colores de acento, con color-mix y respaldo */
+.jr-root {
+    --jr-accent-soft: rgba(0, 164, 220, .18);
+    --jr-accent-soft: color-mix(in srgb, var(--jr-accent) 20%, transparent);
+    --jr-accent-line: rgba(0, 164, 220, .45);
+    --jr-accent-line: color-mix(in srgb, var(--jr-accent) 45%, transparent);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Botones de entrada (cabecera / flotante)                         */
+/* ------------------------------------------------------------------ */
+
+/* Botón dentro de la cabecera clásica de Jellyfin (layout legacy) */
+.jr-header-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    padding: .5em;
+    margin: 0 .1em;
+    border-radius: 50%;
+    transition: background-color .18s ease, color .18s ease, transform .18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.jr-header-button:hover,
+.jr-header-button:focus-visible {
+    background: var(--jr-accent-soft);
+    color: var(--jr-accent);
+}
+
+.jr-header-button:active {
+    transform: scale(.92);
+}
+
+.jr-header-button .material-icons {
+    font-size: 1.35em;
+}
+
+/* Botón dentro de la barra MUI (layout moderno de Jellyfin 12) */
+.jr-mui-button.MuiIconButton-root,
+button.jr-mui-button {
+    color: inherit;
+    border-radius: 50%;
+}
+
+/* Botón flotante (FAB): garantía de que siempre hay acceso, sobre todo en móvil */
+.jr-fab {
+    position: fixed;
+    right: clamp(12px, 3vw, 26px);
+    bottom: clamp(76px, 12vh, 108px);
+    z-index: 900;
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--jr-accent-contrast);
+    background: radial-gradient(circle at 30% 25%, #fff6, transparent 55%), var(--jr-accent);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .12) inset;
+    transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), box-shadow .2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.jr-fab:hover,
+.jr-fab:focus-visible {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .18) inset;
+}
+
+.jr-fab:active {
+    transform: scale(.95);
+}
+
+.jr-fab svg {
+    width: 28px;
+    height: 28px;
+    display: block;
+}
+
+/* Punto de "novedad" la primera vez */
+.jr-fab::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid var(--jr-accent);
+    opacity: 0;
+    animation: jr-ping 2.6s ease-out 3;
+    pointer-events: none;
+}
+
+@keyframes jr-ping {
+    0% { opacity: .7; transform: scale(.85); }
+    70% { opacity: 0; transform: scale(1.25); }
+    100% { opacity: 0; transform: scale(1.25); }
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Overlay                                                          */
+/* ------------------------------------------------------------------ */
+.jr-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: flex;
+    flex-direction: column;
+    color: var(--jr-text);
+    background:
+        radial-gradient(120% 90% at 50% 0%, var(--jr-accent-soft), transparent 60%),
+        var(--jr-veil);
+    backdrop-filter: blur(18px) saturate(1.15);
+    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    font-family: inherit;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .28s ease, visibility .28s ease;
+    overscroll-behavior: contain;
+}
+
+.jr-overlay[data-open="true"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Cabecera del overlay */
+.jr-top {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: clamp(.6rem, 2vw, 1.1rem) clamp(.8rem, 3vw, 1.6rem);
+    border-bottom: 1px solid var(--jr-divider);
+    flex: 0 0 auto;
+}
+
+.jr-logo {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    min-width: 0;
+}
+
+.jr-logo svg {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    filter: drop-shadow(0 2px 8px var(--jr-accent-soft));
+}
+
+.jr-title {
+    font-size: clamp(1.05rem, 2.6vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: .02em;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.jr-title em {
+    font-style: normal;
+    background: linear-gradient(92deg, var(--jr-gold), #fff3c4 45%, var(--jr-accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.jr-spacer {
+    flex: 1 1 auto;
+}
+
+.jr-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    border: 1px solid var(--jr-divider);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--jr-text-dim);
+    cursor: pointer;
+    transition: background-color .16s ease, color .16s ease, transform .16s ease;
+}
+
+.jr-icon-btn:hover,
+.jr-icon-btn:focus-visible {
+    background: var(--jr-hover);
+    color: var(--jr-text);
+}
+
+.jr-icon-btn:active {
+    transform: scale(.92);
+}
+
+.jr-icon-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. Filtros                                                          */
+/* ------------------------------------------------------------------ */
+.jr-filters {
+    flex: 0 0 auto;
+    padding: clamp(.55rem, 1.6vw, .9rem) clamp(.8rem, 3vw, 1.6rem);
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    border-bottom: 1px solid var(--jr-divider);
+    background: linear-gradient(180deg, rgba(0, 0, 0, .22), transparent);
+}
+
+.jr-filter-row {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    flex-wrap: wrap;
+}
+
+.jr-filter-label {
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--jr-text-dim);
+    font-weight: 700;
+    flex: 0 0 auto;
+    min-width: 5.2em;
+}
+
+/* Controles segmentados (Películas / Series / Ambos) */
+.jr-segmented {
+    display: inline-flex;
+    padding: 3px;
+    gap: 3px;
+    background: rgba(0, 0, 0, .28);
+    border: 1px solid var(--jr-divider);
+    border-radius: 999px;
+}
+
+.jr-seg {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--jr-text-dim);
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 600;
+    padding: .42em .95em;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .4em;
+    white-space: nowrap;
+    transition: background-color .18s ease, color .18s ease;
+}
+
+.jr-seg svg {
+    width: 15px;
+    height: 15px;
+}
+
+.jr-seg:hover {
+    color: var(--jr-text);
+    background: var(--jr-hover);
+}
+
+.jr-seg[aria-pressed="true"] {
+    background: var(--jr-accent);
+    color: var(--jr-accent-contrast);
+}
+
+/* Chips de género: scroll horizontal en móvil, wrap en escritorio */
+.jr-genres {
+    display: flex;
+    gap: .4rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: .25rem .1rem .45rem;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    flex: 1 1 100%;
+}
+
+.jr-genres::-webkit-scrollbar {
+    height: 6px;
+}
+
+.jr-genres::-webkit-scrollbar-thumb {
+    background: var(--jr-divider);
+    border-radius: 3px;
+}
+
+.jr-chip {
+    appearance: none;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    display: inline-flex;
+    align-items: center;
+    gap: .38em;
+    border: 1px solid var(--jr-divider);
+    background: rgba(255, 255, 255, .035);
+    color: var(--jr-text-dim);
+    font: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    padding: .42em .8em;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform .16s ease, background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.jr-chip:hover {
+    color: var(--jr-text);
+    border-color: var(--jr-accent-line);
+    transform: translateY(-1px);
+}
+
+.jr-chip[aria-pressed="true"] {
+    background: var(--jr-accent-soft);
+    border-color: var(--jr-accent);
+    color: var(--jr-accent);
+}
+
+.jr-chip .jr-count {
+    font-size: .72em;
+    opacity: .68;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Switch "solo no vistos" */
+.jr-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: .5em;
+    cursor: pointer;
+    font-size: .84rem;
+    color: var(--jr-text-dim);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.jr-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.jr-track {
+    width: 42px;
+    height: 24px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .16);
+    border: 1px solid var(--jr-divider);
+    position: relative;
+    transition: background-color .2s ease;
+}
+
+.jr-track::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .5);
+    transition: transform .22s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.jr-switch input:checked + .jr-track {
+    background: var(--jr-accent);
+    border-color: transparent;
+}
+
+.jr-switch input:checked + .jr-track::after {
+    transform: translateX(18px);
+}
+
+.jr-switch input:focus-visible + .jr-track {
+    outline: 2px solid var(--jr-accent);
+    outline-offset: 2px;
+}
+
+/* Select de biblioteca */
+.jr-select {
+    appearance: none;
+    font: inherit;
+    font-size: .82rem;
+    color: var(--jr-text);
+    background: rgba(0, 0, 0, .3);
+    border: 1px solid var(--jr-divider);
+    border-radius: .5rem;
+    padding: .45em 2.1em .45em .75em;
+    max-width: 15rem;
+    cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+
+.jr-select:focus-visible {
+    outline: 2px solid var(--jr-accent);
+    outline-offset: 1px;
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. Escenario de la ruleta (3D)                                      */
+/* ------------------------------------------------------------------ */
+.jr-stage-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    padding: clamp(.4rem, 2vh, 1.2rem) 0;
+}
+
+.jr-stage {
+    position: relative;
+    width: min(100%, 1100px);
+    height: 100%;
+    min-height: 220px;
+    display: grid;
+    place-items: center;
+    perspective: 1400px;
+    perspective-origin: 50% 42%;
+}
+
+/* Aguja/indicador superior */
+.jr-pointer {
+    position: absolute;
+    top: clamp(-2px, 1vh, 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-top: 20px solid var(--jr-gold);
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+    z-index: 5;
+    transition: transform .09s ease-out;
+}
+
+.jr-pointer.jr-tick {
+    transform: translateX(-50%) scaleY(.72);
+}
+
+/* Halo de suelo */
+.jr-floor {
+    position: absolute;
+    left: 50%;
+    bottom: 6%;
+    width: min(78%, 720px);
+    height: 46px;
+    transform: translateX(-50%);
+    background: radial-gradient(50% 50% at 50% 50%, var(--jr-accent-soft), transparent 72%);
+    filter: blur(6px);
+    pointer-events: none;
+}
+
+.jr-ring-viewport {
+    position: relative;
+    transform-style: preserve-3d;
+    transform: scale(var(--jr-ring-scale));
+}
+
+.jr-ring {
+    position: relative;
+    width: var(--jr-card-w);
+    height: var(--jr-card-h);
+    transform-style: preserve-3d;
+    transform: rotateX(var(--jr-tilt)) rotateY(var(--jr-angle));
+    will-change: transform;
+}
+
+.jr-card {
+    position: absolute;
+    inset: 0;
+    width: var(--jr-card-w);
+    height: var(--jr-card-h);
+    border-radius: var(--jr-radius);
+    overflow: hidden;
+    background: linear-gradient(160deg, var(--jr-surface-2), var(--jr-surface));
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .5);
+    transform: rotateY(calc(var(--jr-i) * var(--jr-step))) translateZ(var(--jr-ring-radius));
+    backface-visibility: hidden;
+    transition: opacity .2s ease, filter .2s ease, box-shadow .2s ease;
+    opacity: .4;
+    filter: saturate(.55) brightness(.6);
+}
+
+.jr-card[data-tier="1"] {
+    opacity: .78;
+    filter: saturate(.85) brightness(.82);
+}
+
+.jr-card[data-tier="0"] {
+    opacity: 1;
+    filter: none;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .6), 0 0 0 2px var(--jr-accent-line);
+}
+
+.jr-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+
+/* Póster sin imagen: degradado + inicial */
+.jr-card .jr-ph {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, .5);
+    background: linear-gradient(150deg, var(--jr-accent-soft), transparent 65%), var(--jr-surface-2);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+}
+
+/* Destello que recorre la ruleta mientras gira */
+.jr-ring.jr-spinning .jr-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, .18) 50%, transparent 65%);
+}
+
+/* Estado "barajando" (mientras llega la respuesta de la API) */
+.jr-shuffling .jr-card {
+    animation: jr-shuffle 1.1s ease-in-out infinite;
+}
+
+@keyframes jr-shuffle {
+    0%, 100% { filter: saturate(.5) brightness(.55); }
+    50% { filter: saturate(.9) brightness(.85); }
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. Botón GIRAR + estado                                             */
+/* ------------------------------------------------------------------ */
+.jr-controls {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .7rem;
+    padding: clamp(.5rem, 2vh, 1rem) clamp(.8rem, 3vw, 1.6rem) clamp(.8rem, 3vh, 1.4rem);
+    flex-wrap: wrap;
+}
+
+.jr-spin {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
+    font-size: clamp(.95rem, 2.4vw, 1.12rem);
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--jr-accent-contrast);
+    padding: .85em 2.3em;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .45), transparent 52%),
+        linear-gradient(180deg, var(--jr-accent), var(--jr-accent));
+    box-shadow: 0 10px 26px rgba(0, 0, 0, .42), 0 0 0 1px rgba(255, 255, 255, .16) inset;
+    display: inline-flex;
+    align-items: center;
+    gap: .6em;
+    transition: transform .18s cubic-bezier(.34, 1.56, .64, 1), box-shadow .2s ease, filter .2s ease;
+    min-width: min(88vw, 320px);
+    justify-content: center;
+}
+
+.jr-spin svg {
+    width: 20px;
+    height: 20px;
+}
+
+.jr-spin:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+    filter: brightness(1.07);
+}
+
+.jr-spin:active:not(:disabled) {
+    transform: translateY(0) scale(.98);
+}
+
+.jr-spin:disabled {
+    cursor: progress;
+    filter: grayscale(.35) brightness(.85);
+}
+
+.jr-spin:focus-visible {
+    outline: 3px solid var(--jr-gold);
+    outline-offset: 3px;
+}
+
+.jr-status {
+    font-size: .82rem;
+    color: var(--jr-text-dim);
+    text-align: center;
+    min-height: 1.2em;
+    flex: 1 0 100%;
+    order: 3;
+}
+
+.jr-status strong {
+    color: var(--jr-accent);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. Ficha del resultado                                              */
+/* ------------------------------------------------------------------ */
+.jr-result {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: clamp(.6rem, 3vw, 2rem);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .3s ease, visibility .3s ease;
+    background: radial-gradient(90% 70% at 50% 45%, rgba(0, 0, 0, .5), transparent 70%);
+}
+
+.jr-result[data-show="true"] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.jr-hero {
+    width: min(100%, 860px);
+    max-height: 100%;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: clamp(.9rem, 2.6vw, 1.7rem);
+    padding: clamp(.9rem, 2.4vw, 1.5rem);
+    border-radius: var(--jr-radius-lg);
+    background: linear-gradient(165deg, var(--jr-surface-2), var(--jr-surface));
+    border: 1px solid var(--jr-divider);
+    box-shadow: var(--jr-shadow), 0 0 0 1px var(--jr-accent-soft);
+    transform: translateY(26px) scale(.9) rotateX(9deg);
+    opacity: 0;
+    scrollbar-width: thin;
+}
+
+.jr-result[data-show="true"] .jr-hero {
+    animation: jr-reveal .62s cubic-bezier(.22, 1.2, .36, 1) forwards;
+}
+
+@keyframes jr-reveal {
+    0% { transform: translateY(26px) scale(.9) rotateX(9deg); opacity: 0; }
+    60% { opacity: 1; }
+    100% { transform: translateY(0) scale(1) rotateX(0); opacity: 1; }
+}
+
+.jr-hero-poster {
+    position: relative;
+    width: clamp(112px, 22vw, 186px);
+    aspect-ratio: 2 / 3;
+    border-radius: var(--jr-radius);
+    overflow: hidden;
+    background: var(--jr-surface-2);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .5);
+    flex: 0 0 auto;
+}
+
+.jr-hero-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.jr-hero-poster .jr-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .3em .55em;
+    border-radius: .35rem;
+    background: var(--jr-gold);
+    color: #1a1206;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .45);
+}
+
+.jr-hero-body {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+    min-width: 0;
+}
+
+.jr-hero-kicker {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    color: var(--jr-accent);
+    font-weight: 800;
+}
+
+.jr-hero-title {
+    margin: 0;
+    font-size: clamp(1.25rem, 4.2vw, 2.05rem);
+    font-weight: 800;
+    line-height: 1.14;
+    overflow-wrap: anywhere;
+}
+
+.jr-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem .55rem;
+    align-items: center;
+    font-size: .82rem;
+    color: var(--jr-text-dim);
+}
+
+.jr-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: .28em;
+}
+
+.jr-pill {
+    border: 1px solid var(--jr-divider);
+    border-radius: 999px;
+    padding: .18em .6em;
+    font-size: .74rem;
+    white-space: nowrap;
+}
+
+.jr-pill.jr-rating {
+    color: var(--jr-gold);
+    border-color: var(--jr-gold-dim);
+    font-weight: 700;
+}
+
+.jr-hero-overview {
+    margin: 0;
+    font-size: .88rem;
+    line-height: 1.55;
+    color: var(--jr-text-dim);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.jr-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .35rem;
+}
+
+.jr-btn {
+    appearance: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: .86rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: .45em;
+    padding: .68em 1.15em;
+    border-radius: 999px;
+    border: 1px solid var(--jr-divider);
+    background: rgba(255, 255, 255, .05);
+    color: var(--jr-text);
+    transition: background-color .18s ease, transform .16s ease, border-color .18s ease;
+}
+
+.jr-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+.jr-btn:hover {
+    background: var(--jr-hover);
+    transform: translateY(-1px);
+}
+
+.jr-btn:active {
+    transform: scale(.97);
+}
+
+.jr-btn:focus-visible {
+    outline: 2px solid var(--jr-accent);
+    outline-offset: 2px;
+}
+
+.jr-btn-primary {
+    background: var(--jr-accent);
+    border-color: transparent;
+    color: var(--jr-accent-contrast);
+}
+
+.jr-btn-primary:hover {
+    background: var(--jr-accent);
+    filter: brightness(1.09);
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. Mensajes vacíos / error / carga                                  */
+/* ------------------------------------------------------------------ */
+.jr-notice {
+    position: absolute;
+    inset: 0;
+    display: none;
+    place-items: center;
+    text-align: center;
+    padding: 1.4rem;
+}
+
+.jr-notice[data-show="true"] {
+    display: grid;
+}
+
+.jr-notice-inner {
+    max-width: 34rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .7rem;
+}
+
+.jr-notice h3 {
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.jr-notice p {
+    margin: 0;
+    color: var(--jr-text-dim);
+    font-size: .9rem;
+    line-height: 1.55;
+}
+
+.jr-notice svg {
+    width: 54px;
+    height: 54px;
+    opacity: .8;
+    color: var(--jr-accent);
+}
+
+/* Spinner */
+.jr-spinner {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 3px solid var(--jr-divider);
+    border-top-color: var(--jr-accent);
+    animation: jr-rotate .8s linear infinite;
+}
+
+@keyframes jr-rotate {
+    to { transform: rotate(360deg); }
+}
+
+/* Skeletons de los chips de género */
+.jr-skeleton {
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--jr-hover) 25%, var(--jr-focus) 37%, var(--jr-hover) 63%);
+    background-size: 400% 100%;
+    animation: jr-shimmer 1.3s ease infinite;
+    height: 30px;
+    width: 92px;
+    flex: 0 0 auto;
+}
+
+@keyframes jr-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+/* Aviso discreto de atajo de teclado */
+.jr-hint {
+    position: absolute;
+    left: 50%;
+    bottom: .35rem;
+    transform: translateX(-50%);
+    font-size: .68rem;
+    color: var(--jr-text-dim);
+    opacity: .65;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.jr-hint kbd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    border: 1px solid var(--jr-divider);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: .05em .38em;
+    font-size: .95em;
+    background: rgba(0, 0, 0, .3);
+}
+
+/* ------------------------------------------------------------------ */
+/* 9. Responsive                                                       */
+/* ------------------------------------------------------------------ */
+
+/* Tablet / móvil apaisado */
+@media (max-width: 900px) {
+    .jr-hero {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        text-align: center;
+    }
+
+    .jr-hero-body {
+        align-items: center;
+    }
+
+    .jr-meta,
+    .jr-hero-actions {
+        justify-content: center;
+    }
+
+    .jr-hero-overview {
+        text-align: left;
+        -webkit-line-clamp: 3;
+    }
+
+    .jr-filter-label {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+/* Móvil en vertical */
+@media (max-width: 560px) {
+    .jr-top {
+        padding-inline: .8rem;
+    }
+
+    .jr-title {
+        font-size: 1rem;
+    }
+
+    .jr-filters {
+        gap: .45rem;
+        padding-inline: .7rem;
+    }
+
+    .jr-filter-row {
+        gap: .4rem;
+    }
+
+    .jr-seg {
+        font-size: .76rem;
+        padding: .4em .7em;
+    }
+
+    .jr-seg .jr-seg-text {
+        display: none;
+    }
+
+    .jr-seg svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .jr-spin {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .jr-hero-poster {
+        width: min(42vw, 150px);
+    }
+
+    .jr-hint {
+        display: none;
+    }
+
+    .jr-fab {
+        bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+        width: 54px;
+        height: 54px;
+    }
+}
+
+/* Pantallas muy bajas (móvil apaisado): priorizamos la ruleta */
+@media (max-height: 460px) {
+    .jr-filters {
+        padding-block: .35rem;
+    }
+
+    .jr-hero {
+        grid-template-columns: auto minmax(0, 1fr);
+        text-align: left;
+    }
+
+    .jr-hero-poster {
+        width: 108px;
+    }
+}
+
+/* Accesibilidad: menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+    .jr-root *,
+    .jr-root *::before,
+    .jr-root *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+
+    .jr-ring {
+        transform: none !important;
+    }
+
+    .jr-card {
+        transform: none !important;
+        position: relative;
+        opacity: 1;
+        filter: none;
+        margin: 0 auto;
+    }
+
+    .jr-card:not(.jr-card--winner) {
+        display: none;
+    }
+}
+
+/* Modo TV (Jellyfin en el salón): elementos más grandes y foco visible */
+.layout-tv .jr-root,
+.jr-root.jr-tv {
+    --jr-card-w: 190px;
+    --jr-card-h: 285px;
+}
+
+.layout-tv .jr-chip,
+.layout-tv .jr-seg,
+.layout-tv .jr-btn {
+    font-size: 1.05rem;
+}
+
+.jr-root :focus-visible {
+    outline: 2px solid var(--jr-accent);
+    outline-offset: 2px;
+}
