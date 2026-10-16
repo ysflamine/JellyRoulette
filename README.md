@@ -9,7 +9,7 @@ Para cuando la pregunta no es *«qué veo»* sino *«no sé qué ver»*.
 
 
 
-<p align="center"><img src="docs/img/ruleta.gif" width="72%" alt="Ruleta girando"></p>
+<p align="center"><img src="docs/ruleta.gif" width="72%" alt="Ruleta girando"></p>
 
 
 ---
