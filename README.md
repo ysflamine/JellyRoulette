@@ -7,7 +7,9 @@ elegido **al azar** entre todos los que cumplen tus filtros.
 Para cuando la pregunta no es *«qué veo»* sino *«no sé qué ver»*.
 
 
-
+![CI](https://github.com/ysflamine/JellyRoulette/actions/workflows/build.yml/badge.svg)
+![Jellyfin 12](https://img.shields.io/badge/Jellyfin-12.x-blue)
+![Jellyfin 10.11](https://img.shields.io/badge/Jellyfin-10.11.x-blue)
 
 <p align="center"><img src="docs/ruleta.gif" width="72%" alt="Ruleta girando"></p>
 
