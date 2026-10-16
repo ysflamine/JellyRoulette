@@ -6,6 +6,7 @@
     "overview": "Ruleta aleatoria de películas y series para la interfaz web de Jellyfin",
     "owner": "ysflamine",
     "category": "General",
+    "imageUrl": "https://raw.githubusercontent.com/ysflamine/JellyRoulette/main/docs/logo.svg",
     "versions": [
       {
         "version": "1.1.0.0",

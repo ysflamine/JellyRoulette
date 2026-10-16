@@ -187,11 +187,13 @@ jobs:
               --arg sum   "$sum" \
               --arg ts    "$TS" \
               --arg log   "$log" \
+              --arg img   "https://raw.githubusercontent.com/ysflamine/JellyRoulette/main/docs/logo.svg" \
               --arg desc  "Ruleta 3D de pósters integrada en la cabecera de Jellyfin: elige género, tipo de medio, biblioteca y si solo quieres títulos no vistos, y deja que el azar decida qué ver." \
               --arg over  "Ruleta aleatoria de películas y series para la interfaz web de Jellyfin" \
               '[{
                  guid:        $guid,
                  name:        $name,
+                 imageUrl:    $img,
                  description: $desc,
                  overview:    $over,
                  owner:       $owner,
