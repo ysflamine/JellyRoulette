@@ -33,3 +33,24 @@ Thumbs.db
 # Logs y temporales
 *.log
 *.tmp
+
+# .NET
+bin/
+obj/
+publish/
+publish-jf10/
+*.dll
+*.pdb
+*.nupkg
+*.snupkg
+meta.json
+
+# Build
+*.user
+*.suo
+*.cache
+*.DotSettings.user
+
+# OS
+Thumbs.db
+.DS_Store
