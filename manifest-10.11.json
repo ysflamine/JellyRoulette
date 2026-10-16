@@ -9,11 +9,11 @@
     "versions": [
       {
         "version": "1.1.0.0",
-        "changelog": "Soporte multi-idioma (ES/EN) con detección del navegador; géneros reconocidos con metadatos en español; el anillo se rellena solo al cambiar filtros.",
+        "changelog": "Soporte multi-idioma (ES/EN) con detección del navegador, géneros reconocidos con metadatos en español y anillo que se rellena solo al cambiar filtros.",
         "targetAbi": "10.11.0.0",
         "sourceUrl": "https://github.com/ysflamine/JellyRoulette/releases/download/v1.1.0/jellyroulette_10.11.zip",
-        "checksum": "BACDFF50398958FF4786A6D8D2CAF9DB",
-        "timestamp": "2026-10-16T16:21:26Z"
+        "checksum": "D92539FD61ED5CDD31AC8D2025E53CE3",
+        "timestamp": "2026-10-16T23:13:45Z"
       }
     ]
   }
