@@ -35,6 +35,12 @@ function makeDom(layout, mobile) {
         pretendToBeVisual: true,
         runScripts: 'outside-only'
     });
+    // Simulamos un navegador en español: la suite afirma textos en español
+    // y la detección de idioma del plugin lee navigator.language.
+    Object.defineProperty(dom.window.Navigator.prototype, 'language', {
+        get: function () { return 'es-ES'; },
+        configurable: true
+    });
 
     const w = dom.window;
 

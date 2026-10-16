@@ -7,7 +7,9 @@ let currentLang = 'en';
 async function initI18n() {
     const browserLang = (navigator.language || navigator.userLanguage || 'en').split('-')[0].toLowerCase();
     currentLang = ['es', 'en'].includes(browserLang) ? browserLang : 'en';
-
+    
+    if (typeof fetch !== 'function') return;
+    
     try {
         const response = await fetch(`/JellyRoulette/Translations?lang=${currentLang}`);
         if (response.ok) {
@@ -766,6 +768,12 @@ initI18n();
     }, true);
 
     JR.open = open; JR.close = close; JR.spin = spin; JR.state = state;
+        // Gancho para tests y depuración: permite forzar idioma y diccionario sin servidor.
+    JR.i18n = {
+        get lang() { return currentLang; },
+        setLang: function (l) { currentLang = String(l || 'en').split('-')[0].toLowerCase(); },
+        setDict: function (d) { i18nDict = d || {}; }
+    };
     JR.api = { get: apiGet, serverAddress: serverAddress, posterUrl: posterUrl }; JR.uiLoaded = true;
     if (window.console && console.info) console.info(LOG, 'interfaz lista. Prueba en consola: JellyRoulette.open()');
 })();
