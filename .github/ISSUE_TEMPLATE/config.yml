@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentación y guía de instalación
+    url: https://github.com/ysflamine/JellyRoulette#-jellyroulette
+    about: Consulta la guía antes de abrir un issue
+  - name: 🔒 Vulnerabilidades de seguridad
+    url: https://github.com/ysflamine/JellyRoulette/security/advisories/new
+    about: NO abras un issue: usa el reporte privado

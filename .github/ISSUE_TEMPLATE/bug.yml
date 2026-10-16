@@ -1,0 +1,86 @@
+name: 🐞 Reportar bug
+description: Algo no funciona como debería
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por el reporte. Cuantos más datos, más rápido se arregla.
+
+  - type: input
+    id: jellyfin-version
+    attributes:
+      label: Versión de Jellyfin
+      description: "La ves en Panel → General, o ejecuta `curl http://localhost:8096/System/Info/Public | grep Version`"
+      placeholder: "10.11.11"
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Versión de JellyRoulette
+      description: "Panel → Plugins → JellyRoulette (esquina superior derecha)"
+      placeholder: "1.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: ¿Cómo instalaste el plugin?
+      options:
+        - Catálogo (automático)
+        - Manual (descarga del zip)
+        - Compilado desde el código fuente
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Entorno del servidor
+      options:
+        - Windows (instalador)
+        - Windows (Docker)
+        - Linux (paquete)
+        - Linux (Docker)
+        - macOS
+        - Otro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Navegador donde aparece el problema
+      options:
+        - Chrome/Edge (Chromium)
+        - Firefox
+        - Safari
+        - Jellyfin Android
+        - Jellyfin iOS
+        - Jellyfin Android TV
+        - Otro
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: ¿Qué pasó?
+      description: "Describe el comportamiento observado y el esperado. Añade capturas si es posible."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs relevantes
+      description: |
+        Pega aquí las líneas de `log_AAAAMMDD.log` donde aparezca `JellyRoulette` (o `[ERR]`/`[FTL]`).
+        Windows: `C:\ProgramData\Jellyfin\Server\log\`
+        Linux: `/var/log/jellyfin/`
+        Docker: `docker logs jellyfin --tail 500`
+      render: shell

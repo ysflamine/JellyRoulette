@@ -1,0 +1,31 @@
+name: 💡 Proponer funcionalidad
+description: Una idea para mejorar el plugin
+title: "[Idea]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: ¿Qué problema intentas resolver?
+      description: "Describe la situación que te gustaría mejorar, no la solución."
+      placeholder: "Cuando tengo que elegir entre 200 películas, me cuesta decidir..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: ¿Cómo imaginas que se resolvería?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: alternativa
+    attributes:
+      label: ¿Usas alguna alternativa ahora?
+      options:
+        - Ninguna
+        - Otro plugin
+        - Herramienta externa
+    validations:
+      required: false
