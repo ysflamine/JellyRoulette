@@ -1,0 +1,14 @@
+{
+  "name": "jellyroulette-frontend-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tests de la interfaz de JellyRoulette en un DOM simulado (jsdom). No forman parte del plugin: solo sirven para desarrollar sin reiniciar Jellyfin.",
+  "scripts": {
+    "test": "node test-frontend.js && node test-preview.js",
+    "test:ui": "node test-frontend.js",
+    "test:preview": "node test-preview.js"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}
