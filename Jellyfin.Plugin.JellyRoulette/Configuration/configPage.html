@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>JellyRoulette</title>
+</head>
+<body>
+<!--
+    Página de configuración del plugin.
+    Jellyfin la sirve desde GET /web/ConfigurationPage?name=JellyRoulette
+    (la registra Plugin.GetPages()). Se muestra en:
+      Panel de control → Plugins → JellyRoulette → Ajustes
+    y, como EnableInMainMenu = true, también en el cajón "Plugins" del panel.
+
+    OJO con dos particularidades de la web de Jellyfin:
+      1) Este HTML NO se carga en un iframe: se inyecta dentro del SPA. Por eso
+         la raíz debe ser <div data-role="page"> y usamos las clases nativas de
+         Jellyfin (emby-select, checkboxContainer, raised button-submit…) para
+         heredar el tema automáticamente.
+      2) Los <script> en línea SÍ se ejecutan (la web expone jQuery y el
+         viewContainer inserta la página con él), pero los <style> pueden
+         perderse en el camino: por eso los estilos extra van en un <link>
+         que crea el propio script.
+-->
+<div id="JellyRouletteConfigPage" data-role="page"
+     class="page type-interior pluginConfigurationPage"
+     data-require="emby-input,emby-button,emby-select,emby-checkbox">
+
+    <div data-role="content">
+        <div class="content-primary">
+
+            <h2 class="sectionTitle">JellyRoulette</h2>
+            <p class="fieldDescription" style="max-width:46em;">
+                Ruleta aleatoria de películas y series integrada en la interfaz web.
+                Los cambios se aplican al guardar; para la interfaz inyectada puede
+                hacer falta recargar la página del navegador (Ctrl + F5).
+            </p>
+
+            <form id="JellyRouletteConfigForm">
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="EnableUiInjection" name="EnableUiInjection" type="checkbox" is="emby-checkbox" />
+                        <span>Mostrar JellyRoulette en la interfaz web</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">
+                        Añade el botón de la ruleta en la cabecera y en el menú lateral.
+                        Si lo desactivas, la API del plugin sigue funcionando.
+                    </div>
+                </div>
+
+                <div class="selectContainer">
+                    <label class="selectLabel" for="FloatingButtonMode">Botón flotante</label>
+                    <select is="emby-select" id="FloatingButtonMode" name="FloatingButtonMode"
+                            class="emby-select-withcolor emby-select">
+                        <option value="Auto">Automático (móvil o si falla la cabecera)</option>
+                        <option value="Always">Siempre visible</option>
+                        <option value="Never">Nunca</option>
+                    </select>
+                    <div class="fieldDescription">
+                        El botón redondo de la esquina inferior derecha. En «Automático» solo
+                        aparece en pantallas pequeñas o cuando el tema impide colocar el botón
+                        en la cabecera.
+                    </div>
+                </div>
+
+                <div class="selectContainer">
+                    <label class="selectLabel" for="DefaultMediaType">Tipo de medio por defecto</label>
+                    <select is="emby-select" id="DefaultMediaType" name="DefaultMediaType"
+                            class="emby-select-withcolor emby-select">
+                        <option value="both">Películas y series</option>
+                        <option value="movie">Solo películas</option>
+                        <option value="series">Solo series</option>
+                    </select>
+                </div>
+
+                <div class="checkboxContainer">
+                    <label class="emby-checkbox-label">
+                        <input id="DefaultUnwatchedOnly" name="DefaultUnwatchedOnly" type="checkbox" is="emby-checkbox" />
+                        <span>Filtrar «solo no vistos» por defecto</span>
+                    </label>
+                </div>
+
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="SpinDurationMs">Duración del giro (ms)</label>
+                    <input id="SpinDurationMs" name="SpinDurationMs" type="number" is="emby-input"
+                           min="1600" max="9000" step="100" />
+                    <div class="fieldDescription">Entre 1600 y 9000. Más alto = más dramático.</div>
+                </div>
+
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="WheelCandidates">Pósters en la ruleta</label>
+                    <input id="WheelCandidates" name="WheelCandidates" type="number" is="emby-input"
+                           min="8" max="60" step="1" />
+                    <div class="fieldDescription">
+                        Cuántos candidatos se descargan del servidor por tirada (8-60).
+                        El anillo visible se adapta al tamaño de pantalla.
+                    </div>
+                </div>
+
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="MaxGenreChips">Máximo de géneros</label>
+                    <input id="MaxGenreChips" name="MaxGenreChips" type="number" is="emby-input"
+                           min="5" max="200" step="5" />
+                    <div class="fieldDescription">Se muestran los géneros con más títulos primero.</div>
+                </div>
+
+                <div class="inputContainer" style="margin-top:1.5em;">
+                    <div class="fieldDescription" id="JellyRouletteStatus">
+                        Versión del plugin: <strong>—</strong>
+                    </div>
+                </div>
+
+                <div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                        <span>Guardar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var JellyRouletteConfig = {
+            // Debe coincidir con Plugin.Id y con el GUID del ensamblado.
+            pluginUniqueId: 'f299f82b-8485-4547-be7c-14e0e10e3b2c'
+        };
+
+        (function () {
+            var page = document.querySelector('#JellyRouletteConfigPage');
+            var form = document.querySelector('#JellyRouletteConfigForm');
+            var fields = [
+                { id: 'EnableUiInjection', type: 'check' },
+                { id: 'FloatingButtonMode', type: 'value' },
+                { id: 'DefaultMediaType', type: 'value' },
+                { id: 'DefaultUnwatchedOnly', type: 'check' },
+                { id: 'SpinDurationMs', type: 'number' },
+                { id: 'WheelCandidates', type: 'number' },
+                { id: 'MaxGenreChips', type: 'number' }
+            ];
+
+            function fill(config) {
+                fields.forEach(function (f) {
+                    var node = document.getElementById(f.id);
+                    if (!node) return;
+                    var value = config[f.id];
+                    if (f.type === 'check') {
+                        node.checked = !!value;
+                    } else if (f.type === 'number') {
+                        node.value = (value === null || value === undefined) ? '' : value;
+                    } else {
+                        node.value = value === null || value === undefined ? '' : String(value);
+                    }
+                });
+            }
+
+            function read(config) {
+                fields.forEach(function (f) {
+                    var node = document.getElementById(f.id);
+                    if (!node) return;
+                    if (f.type === 'check') {
+                        config[f.id] = !!node.checked;
+                    } else if (f.type === 'number') {
+                        var n = parseInt(node.value, 10);
+                        config[f.id] = isNaN(n) ? config[f.id] : n;
+                    } else {
+                        config[f.id] = node.value;
+                    }
+                });
+                return config;
+            }
+
+            function showVersion() {
+                var box = document.getElementById('JellyRouletteStatus');
+                if (!box) return;
+                var base = (window.JellyRoulette && window.JellyRoulette.base)
+                    ? window.JellyRoulette.base
+                    : (ApiClient && ApiClient.getUrl ? ApiClient.getUrl('JellyRoulette') : null);
+                if (!base) return;
+
+                fetch(base + '/Info', {
+                    headers: {
+                        Accept: 'application/json',
+                        Authorization: 'MediaBrowser Token="' + (ApiClient.accessToken() || '') + '"'
+                    }
+                }).then(function (r) { return r.json(); })
+                  .then(function (info) {
+                      box.innerHTML = 'Versión del plugin: <strong>' + (info.version || info.Version || '?') +
+                          '</strong> · interfaz inyectada: <strong>' +
+                          (window.JellyRoulette && window.JellyRoulette.uiLoaded ? 'sí' : 'no (recarga la web)') + '</strong>';
+                  }).catch(function () { /* sin versión, no pasa nada */ });
+            }
+
+            // La web de Jellyfin dispara "pageshow" al mostrar la página del plugin.
+            page.addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(JellyRouletteConfig.pluginUniqueId).then(function (config) {
+                    fill(config);
+                    Dashboard.hideLoadingMsg();
+                    showVersion();
+                }).catch(function () {
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+
+                ApiClient.getPluginConfiguration(JellyRouletteConfig.pluginUniqueId).then(function (config) {
+                    var updated = read(config);
+                    return ApiClient.updatePluginConfiguration(JellyRouletteConfig.pluginUniqueId, updated);
+                }).then(function (result) {
+                    Dashboard.processPluginConfigurationUpdateResult(result);
+                }).catch(function (err) {
+                    Dashboard.hideLoadingMsg();
+                    if (window.console) console.error('[JellyRoulette] error al guardar', err);
+                });
+
+                return false;
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>
