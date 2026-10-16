@@ -62,18 +62,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--
-      Todo el frontend (HTML/CSS/JS) y la página de configuración viajan
-      DENTRO de la DLL como "recursos incrustados". Ventaja: instalar el plugin
-      es copiar UNA carpeta con la DLL; no hay que colocar archivos sueltos en
-      el directorio web de Jellyfin.
-      Nombre lógico resultante: Jellyfin.Plugin.JellyRoulette.Web.<archivo>
-    -->
     <None Remove="Configuration\configPage.html" />
     <EmbeddedResource Include="Configuration\configPage.html" />
 
     <None Remove="Web\**\*" />
     <EmbeddedResource Include="Web\**\*" />
+    <None Remove="translations\**\*" />
+    <EmbeddedResource Include="translations\**\*" />
   </ItemGroup>
 
   <!--
