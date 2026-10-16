@@ -81,7 +81,7 @@
       <_MetaPath>$(PublishDir)meta.json</_MetaPath>
       <_MetaJson>{
   "category": "General",
-  "changelog": "Soporte multi-idioma (ES/EN) con detección del navegador; géneros reconocidos con metadatos en español; el anillo se rellena solo al cambiar filtros.",
+  "changelog": "Soporte multi-idioma (ES/EN) con detección del navegador, géneros reconocidos con metadatos en español y anillo que se rellena solo al cambiar filtros.",
   "description": "Añade una ruleta animada a la interfaz web de Jellyfin: elige género, tipo de medio y estado de visualización y deja que el azar decida qué ver.",
   "id": "$(PluginGuid)",
   "name": "JellyRoulette",
