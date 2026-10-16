@@ -36,7 +36,7 @@ initI18n();
 
     var JR = (window.JellyRoulette = window.JellyRoulette || {});
     if (!JR.version || JR.version === '1') {
-        JR.version = '1.0.1';
+        JR.version = '1.1.0';
     }
 
     var LOG = '[JellyRoulette]';
