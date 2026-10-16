@@ -1,0 +1,110 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    ============================================================================
+    JellyRoulette — csproj explicado para principiantes
+    ============================================================================
+    1) Doble objetivo de compilación (multi-target):
+         JellyfinTarget=jf12  -> Jellyfin 12.x   (.NET 10)  [por defecto]
+         JellyfinTarget=jf10  -> Jellyfin 10.11.x (.NET 9)
+       Con esto, UN MISMO código fuente genera dos DLL distintas, una por rama.
+       NUNCA se debe usar la misma DLL en ambas: el runtime no coincide.
+
+    2) <ExcludeAssets>runtime</ExcludeAssets> en los paquetes de Jellyfin:
+       esos ensamblados YA los carga el servidor. Si los copiáramos a la carpeta
+       del plugin, Jellyfin petaría con conflictos de versiones. Se usan solo
+       para compilar (compile-time), no se publican.
+
+    3) <FrameworkReference Include="Microsoft.AspNetCore.App" />:
+       da acceso a ControllerBase, [Authorize], IStartupFilter, etc. sin añadir
+       ni un solo paquete NuGet extra.
+    ============================================================================
+  -->
+
+  <PropertyGroup>
+    <JellyfinTarget Condition="'$(JellyfinTarget)' == ''">jf12</JellyfinTarget>
+
+    <TargetFramework Condition="'$(JellyfinTarget)' == 'jf10'">net9.0</TargetFramework>
+    <TargetFramework Condition="'$(JellyfinTarget)' != 'jf10'">net10.0</TargetFramework>
+
+    <JellyfinVersion Condition="'$(JellyfinTarget)' == 'jf10'">10.11.11</JellyfinVersion>
+    <JellyfinVersion Condition="'$(JellyfinTarget)' != 'jf10'">12.2.0</JellyfinVersion>
+
+    <Product>JellyRoulette for Jellyfin</Product>
+    <Company>JellyRoulette</Company>
+    <Copyright>Copyright © 2026 — GPLv3</Copyright>
+    <RootNamespace>Jellyfin.Plugin.JellyRoulette</RootNamespace>
+    <AssemblyName>Jellyfin.Plugin.JellyRoulette</AssemblyName>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- GUID único del plugin. Debe coincidir con Plugin.Id y con meta.json -->
+    <PluginGuid>f299f82b-8485-4547-be7c-14e0e10e3b2c</PluginGuid>
+    <PluginTargetAbi Condition="'$(JellyfinTarget)' == 'jf10'">10.11.0.0</PluginTargetAbi>
+    <PluginTargetAbi Condition="'$(JellyfinTarget)' != 'jf10'">12.0.0.0</PluginTargetAbi>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Acceso a ASP.NET Core (MVC + Hosting) que ya aporta el servidor -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="$(JellyfinVersion)">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Jellyfin.Model" Version="$(JellyfinVersion)">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Todo el frontend (HTML/CSS/JS) y la página de configuración viajan
+      DENTRO de la DLL como "recursos incrustados". Ventaja: instalar el plugin
+      es copiar UNA carpeta con la DLL; no hay que colocar archivos sueltos en
+      el directorio web de Jellyfin.
+      Nombre lógico resultante: Jellyfin.Plugin.JellyRoulette.Web.<archivo>
+    -->
+    <None Remove="Configuration\configPage.html" />
+    <EmbeddedResource Include="Configuration\configPage.html" />
+
+    <None Remove="Web\**\*" />
+    <EmbeddedResource Include="Web\**\*" />
+  </ItemGroup>
+
+  <!--
+    Al publicar (dotnet publish) se genera meta.json en la carpeta de salida.
+    Ese archivo es el "manifiesto" que Jellyfin lee para mostrar nombre,
+    descripción y compatibilidad (targetAbi) del plugin instalado a mano.
+  -->
+  <Target Name="WritePluginMeta" AfterTargets="Publish">
+    <PropertyGroup>
+      <_MetaPath>$(PublishDir)meta.json</_MetaPath>
+      <_MetaJson>{
+  "category": "General",
+  "changelog": "Primera versión: ruleta de películas y series con filtros.",
+  "description": "Añade una ruleta animada a la interfaz web de Jellyfin: elige género, tipo de medio y estado de visualización y deja que el azar decida qué ver.",
+  "id": "$(PluginGuid)",
+  "name": "JellyRoulette",
+  "overview": "Ruleta aleatoria de películas y series integrada en la web de Jellyfin",
+  "owner": "JellyRoulette",
+  "targetAbi": "$(PluginTargetAbi)",
+  "timestamp": "$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))",
+  "version": "$(Version)",
+  "status": "Active",
+  "autoUpdate": false,
+  "imagePath": null,
+  "assemblies": [
+    "$(AssemblyName).dll"
+  ]
+}</_MetaJson>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_MetaPath)" Lines="$(_MetaJson)" Overwrite="true" WriteOnlyWhenDifferent="false" />
+    <Message Importance="high" Text="JellyRoulette: meta.json generado en $(_MetaPath)" />
+  </Target>
+
+</Project>
