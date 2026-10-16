@@ -1,0 +1,35 @@
+# Artefactos de compilación y publicación
+# (publish/ y publish-jf10/ se generan con `dotnet publish`: son binarios, no código)
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+publish*/
+artifacts/
+*.user
+*.suo
+
+# Paquetes de release generados en local (los publica la CI, nunca van a Git)
+*.zip
+*.nupkg
+
+# Dependencias de los tests de frontend
+node_modules/
+package-lock.json
+
+# IDEs
+.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.idea/
+*.swp
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs y temporales
+*.log
+*.tmp

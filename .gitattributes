@@ -1,0 +1,52 @@
+# ============================================================================
+# .gitattributes — Normaliza los saltos de línea entre Windows / Linux / macOS
+# ============================================================================
+# ¿Por qué importa en ESTE proyecto?
+#   Los archivos de Web/ y Configuration/configPage.html se incrustan DENTRO de
+#   la DLL como recursos. Si Git los convierte a CRLF al hacer checkout en
+#   Windows, la DLL resultante cambia de tamaño y de hash respecto a la que se
+#   compila en la CI (Linux). No rompe nada, pero hace imposible comparar
+#   binarios y ensucia los diffs de "solo un salto de línea".
+#
+#   Con esto, el repositorio guarda SIEMPRE LF y tú decides qué quieres en tu
+#   disco. Los .ps1 y .cmd sí van en CRLF porque PowerShell antiguo se queja.
+# ============================================================================
+
+# Por defecto: que Git detecte texto y lo normalice a LF en el repositorio
+* text=auto eol=lf
+
+# --- Código fuente (LF en el repo y en el disco) ---
+*.cs     text eol=lf
+*.csproj text eol=lf
+*.props  text eol=lf
+*.slnx   text eol=lf
+*.js     text eol=lf
+*.css    text eol=lf
+*.html   text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.winget text eol=lf
+
+# --- Scripts de Windows: CRLF de verdad ---
+*.ps1    text eol=crlf
+*.psm1   text eol=crlf
+*.cmd    text eol=crlf
+*.bat    text eol=crlf
+
+# --- Binarios: que Git NO intente interpretar ni hacer diffs de texto ---
+*.dll    binary
+*.pdb    binary
+*.exe    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.woff   binary
+*.woff2  binary
+
+# --- Diffs útiles en GitHub ---
+*.cs     diff=csharp
+*.md     diff=markdown

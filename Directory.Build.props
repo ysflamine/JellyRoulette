@@ -1,0 +1,14 @@
+<Project>
+  <!--
+    Versión única para todo el repositorio.
+    ¡IMPORTANTE! Jellyfin usa AssemblyVersion para identificar el plugin.
+    Si cambias el código, sube esta versión o el servidor puede seguir cargando
+    la copia antigua que quedó en la carpeta plugins/.
+  -->
+  <PropertyGroup>
+    <Version>1.0.1.0</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <InformationalVersion>1.0.1</InformationalVersion>
+  </PropertyGroup>
+</Project>
