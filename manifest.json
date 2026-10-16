@@ -1,0 +1,20 @@
+[
+  {
+    "guid": "f299f82b-8485-4547-be7c-14e0e10e3b2c",
+    "name": "JellyRoulette",
+    "description": "Ruleta 3D de pósters integrada en la cabecera de Jellyfin: elige género, tipo de medio, biblioteca y si solo quieres títulos no vistos, y deja que el azar decida qué ver.",
+    "overview": "Ruleta aleatoria de películas y series para la interfaz web de Jellyfin",
+    "owner": "ysflamine",
+    "category": "General",
+    "versions": [
+      {
+        "version": "1.0.1.0",
+        "changelog": "Primera versión pública: ruleta 3D con filtros de género, tipo de medio, biblioteca y estado de visualización.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/ysflamine/JellyRoulette/releases/download/v1.0.1/jellyroulette_12.zip",
+        "checksum": "00000000000000000000000000000000",
+        "timestamp": "2026-10-16T14:30:00Z"
+      }
+    ]
+  }
+]
