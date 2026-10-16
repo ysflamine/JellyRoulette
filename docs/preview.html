@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JellyRoulette — Previsualización sin servidor</title>
+<!--
+    =========================================================================
+    PREVISUALIZACIÓN LOCAL DE LA RULETA
+    =========================================================================
+    Abre este archivo directamente en el navegador (doble clic) y verás la
+    MISMA interfaz que inyecta el plugin en Jellyfin, pero con datos falsos:
+    no hace falta servidor, ni biblioteca, ni iniciar sesión.
+
+    Sirve para:
+      · Retocar colores/tamaños/animación y ver el resultado al instante.
+      · Comprobar el diseño responsive (estrecha la ventana o usa las DevTools
+        en modo móvil) sin reiniciar Jellyfin cada vez.
+      · Enseñarle el plugin a alguien antes de instalarlo.
+
+    Qué es real y qué es de pega:
+      · REAL:  Web/roulette.css y Web/roulette.js (los mismos que se incrustan
+               en la DLL y se sirven en producción).
+      · DE PEGA: window.ApiClient (un simulador con 60 títulos inventados y
+               pósters SVG generados al vuelo).
+    =========================================================================
+-->
+<link rel="stylesheet" href="../Jellyfin.Plugin.JellyRoulette/Web/roulette.css">
+<style>
+    /* Solo para el fondo de esta página de demo. En Jellyfin el fondo lo pone él. */
+    html, body {
+        margin: 0;
+        min-height: 100%;
+        background: #101010;
+        color: #fff;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    .demo-note {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        opacity: .45;
+        font-size: .9rem;
+        line-height: 1.6;
+        pointer-events: none;
+        z-index: 0;
+    }
+</style>
+</head>
+<body>
+
+<div class="demo-note">
+    <p><strong>Previsualización de JellyRoulette</strong><br>
+    Datos simulados · la ruleta se abre sola en 1 segundo<br>
+    (pulsa <code>Esc</code> para cerrarla y el botón flotante para volver a abrirla)</p>
+</div>
+
+<script>
+/* =========================================================================
+   Simulador del ApiClient de Jellyfin
+   ========================================================================= */
+(function () {
+    'use strict';
+
+    var GENRES = ['Horror', 'Comedy', 'Action', 'Drama', 'Science Fiction', 'Thriller',
+                  'Adventure', 'Animation', 'Romance', 'Mystery', 'Western', 'Family'];
+
+    var TITULOS = [
+        'El último faro', 'Neón y ceniza', 'La casa del reloj', 'Órbita cero', 'Marea roja',
+        'El jardinero nocturno', 'Tres inviernos', 'Cenizas de agosto', 'La ruta del salmón',
+        'Vértigo azul', 'El archivo Kovac', 'Noche de tránsito', 'Los nombres del agua',
+        'Perro de hierro', 'La séptima carta', 'Cielo partido', 'El taller de las sombras',
+        'Ruido blanco', 'Estación Polar', 'Los días contados', 'Mármol y pólvora', 'La visita',
+        'Camino de sirga', 'El club de los insomnes', 'Tormenta seca', 'La herencia de Nadia',
+        'Puerto escondido', 'El eco de las grúas', 'Arena y cristal', 'La última función',
+        'Bosque umbral', 'El contrato Salviati', 'Ruta 9', 'Los huéspedes', 'Viento de leva',
+        'La máquina de olvidar', 'Cielo de plomo', 'El orden natural', 'Siete puertas',
+        'La carta robada', 'Puente de plata', 'El invierno largo', 'Zona muerta', 'Los durmientes',
+        'Fuego lento', 'La biblioteca de arena', 'Cabo negro', 'El sustituto', 'Marea viva',
+        'Los últimos días de K', 'Territorio comanche', 'La dama de hielo', 'Río abajo',
+        'El cuarto de atrás', 'Señales de humo', 'La ciudad sitiada', 'Perros de paja',
+        'El jardín de alambre', 'Norte perdido', 'Bailando sobre hielo'
+    ];
+
+    /* --- pósters SVG generados al vuelo (sin red, sin archivos) --- */
+    var PALETTES = [
+        ['#0f2027', '#2c5364'], ['#3a1c71', '#d76d77'], ['#134e5e', '#71b280'],
+        ['#41295a', '#2f0743'], ['#1f4037', '#99f2c8'], ['#360033', '#0b8793'],
+        ['#5f2c82', '#49a09d'], ['#232526', '#414345'], ['#870000', '#190a05'],
+        ['#00467f', '#a5cc82'], ['#4b1248', '#f0c27b'], ['#0f0c29', '#24243e']
+    ];
+
+    function posterDataUri(title, index) {
+        var p = PALETTES[index % PALETTES.length];
+        var initial = (title.trim().charAt(0) || '?').toUpperCase();
+        var svg =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450">' +
+            '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0%" stop-color="' + p[0] + '"/><stop offset="100%" stop-color="' + p[1] + '"/>' +
+            '</linearGradient></defs>' +
+            '<rect width="300" height="450" fill="url(#g)"/>' +
+            '<circle cx="240" cy="70" r="120" fill="#ffffff" opacity="0.06"/>' +
+            '<circle cx="40" cy="400" r="90" fill="#000000" opacity="0.12"/>' +
+            '<text x="150" y="205" font-family="system-ui, sans-serif" font-size="120" font-weight="800" ' +
+            'fill="#ffffff" opacity="0.22" text-anchor="middle">' + initial + '</text>' +
+            '<text x="150" y="400" font-family="system-ui, sans-serif" font-size="22" font-weight="700" ' +
+            'fill="#ffffff" opacity="0.92" text-anchor="middle">' +
+            title.replace(/[<>&"]/g, '').slice(0, 26) + '</text>' +
+            '</svg>';
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    /* --- catálogo simulado --- */
+    var ITEMS = TITULOS.map(function (title, i) {
+        return {
+            Id: 'demo-' + i,
+            Name: title,
+            Type: i % 4 === 3 ? 'Series' : 'Movie',
+            Year: 1972 + (i * 3) % 53,
+            Overview: 'Demo de JellyRoulette: «' + title + '» es un título inventado para poder ' +
+                      'probar la interfaz sin necesidad de un servidor Jellyfin real. Cambia los ' +
+                      'filtros y gira la ruleta todas las veces que quieras.',
+            Genres: [GENRES[i % GENRES.length], GENRES[(i * 5 + 3) % GENRES.length]],
+            CommunityRating: Math.round((5 + ((i * 7) % 50) / 10) * 10) / 10,
+            OfficialRating: ['PG', 'PG-13', 'R', '16', '18'][i % 5],
+            RunTimeMinutes: 82 + ((i * 11) % 70),
+            HasPrimaryImage: true,
+            Played: i % 9 === 0,
+            IsFavorite: i % 11 === 0
+        };
+    });
+
+    var LIBRARIES = [
+        { Id: 'demo-lib-movies', Name: 'Películas', CollectionType: 'movies' },
+        { Id: 'demo-lib-tv', Name: 'Series', CollectionType: 'tvshows' },
+        { Id: 'demo-lib-music', Name: 'Música', CollectionType: 'music' }
+    ];
+
+    function parseParams(url) {
+        var q = url.split('?')[1] || '';
+        var out = {};
+        q.split('&').filter(Boolean).forEach(function (pair) {
+            var kv = pair.split('=');
+            out[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
+        });
+        return out;
+    }
+
+    function matches(item, p) {
+        if (p.mediaType === 'movie' && item.Type !== 'Movie') return false;
+        if (p.mediaType === 'series' && item.Type !== 'Series') return false;
+        if (p.unwatchedOnly === 'true' && item.Played) return false;
+        if (p.genres) {
+            var wanted = p.genres.split(',').filter(Boolean);
+            if (wanted.length && !wanted.some(function (g) { return item.Genres.indexOf(g) !== -1; })) {
+                return false;
+            }
+        }
+        if (p.libraryId === 'demo-lib-movies' && item.Type !== 'Movie') return false;
+        if (p.libraryId === 'demo-lib-tv' && item.Type !== 'Series') return false;
+        return true;
+    }
+
+    /* Retardo simulado de red para que se aprecie la fase de "barajando". */
+    function delayed(payload, ms) {
+        return new Promise(function (resolve) {
+            setTimeout(function () { resolve(JSON.parse(JSON.stringify(payload))); }, ms || 260);
+        });
+    }
+
+    window.ApiClient = {
+        accessToken: function () { return 'DEMO-TOKEN'; },
+        serverAddress: function () { return window.location.origin; },
+        getImageUrl: function (id, opts) {
+            var index = parseInt(String(id).replace('demo-', ''), 10) || 0;
+            return posterDataUri(TITULOS[index % TITULOS.length], index);
+        },
+        ajax: function (options) {
+            var url = options.url || '';
+            var route = url.split('?')[0];
+            var p = parseParams(url);
+
+            if (/\/Info$/.test(route)) {
+                return delayed({
+                    name: 'JellyRoulette (demo)',
+                    version: '1.0.0-demo',
+                    id: 'demo',
+                    ui: { enableInjection: true, floatingButton: 'Always', spinDurationMs: 4200, candidates: 28 },
+                    defaults: { mediaType: 'both', unwatchedOnly: false, maxGenreChips: 40 }
+                }, 40);
+            }
+
+            if (/\/Libraries$/.test(route)) {
+                return delayed(LIBRARIES, 60);
+            }
+
+            if (/\/Genres$/.test(route)) {
+                var pool = ITEMS.filter(function (i) {
+                    return matches(i, { mediaType: p.mediaType, libraryId: p.libraryId });
+                });
+                var counts = {};
+                pool.forEach(function (i) {
+                    i.Genres.forEach(function (g) {
+                        counts[g] = counts[g] || { Name: g, MovieCount: 0, SeriesCount: 0, TotalCount: 0 };
+                        if (i.Type === 'Movie') counts[g].MovieCount++;
+                        else counts[g].SeriesCount++;
+                        counts[g].TotalCount++;
+                    });
+                });
+                var list = Object.keys(counts).map(function (k) { return counts[k]; })
+                    .sort(function (a, b) { return b.TotalCount - a.TotalCount; });
+                return delayed(list, 90);
+            }
+
+            if (/\/Spin$/.test(route)) {
+                var filtered = ITEMS.filter(function (i) { return matches(i, p); });
+                if (!filtered.length) {
+                    return delayed({ Winner: null, Candidates: [], TotalMatches: 0, Filters: {} }, 200);
+                }
+                var winner = filtered[Math.floor(Math.random() * filtered.length)];
+                var candidates = filtered.filter(function (i) { return i.Id !== winner.Id; })
+                    .sort(function () { return Math.random() - 0.5; })
+                    .slice(0, parseInt(p.candidates, 10) || 28);
+                return delayed({
+                    Winner: winner,
+                    Candidates: candidates,
+                    TotalMatches: filtered.length,
+                    Filters: {
+                        MediaType: p.mediaType || 'both',
+                        UnwatchedOnly: p.unwatchedOnly === 'true',
+                        Genres: (p.genres || '').split(',').filter(Boolean),
+                        LibraryId: p.libraryId || null,
+                        IncludeItemTypes: ['Movie', 'Series']
+                    }
+                }, 320);
+            }
+
+            return delayed(null, 10);
+        }
+    };
+
+    /* Navegación simulada: en Jellyfin esto abriría la ficha del título. */
+    window.Dashboard = {
+        navigate: function (target) {
+            console.info('[demo] Dashboard.navigate("' + target + '") — en Jellyfin abriría esa ficha.');
+            var banner = document.createElement('div');
+            banner.textContent = 'Demo: se navegaría a #/' + target;
+            banner.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);' +
+                'background:#00a4dc;color:#04121a;padding:.6em 1.1em;border-radius:999px;' +
+                'font:600 .85rem system-ui,sans-serif;z-index:2147483647;box-shadow:0 8px 24px rgba(0,0,0,.5)';
+            document.body.appendChild(banner);
+            setTimeout(function () { banner.remove(); }, 2600);
+        }
+    };
+
+    /* Espacio de nombres que normalmente crea roulette.loader.js */
+    window.JellyRoulette = {
+        base: window.location.origin + '/JellyRoulette',
+        version: '1.0.0-demo',
+        getApiClient: function () { return window.ApiClient; },
+        config: { floatingButton: 'Always' }
+    };
+})();
+</script>
+
+<script src="../Jellyfin.Plugin.JellyRoulette/Web/roulette.js"></script>
+
+<script>
+    // Botón flotante (en Jellyfin lo inyecta roulette.loader.js).
+    (function () {
+        var fab = document.createElement('button');
+        fab.type = 'button';
+        fab.className = 'jr-fab jr-root';
+        fab.id = 'jr-fab';
+        fab.title = 'Abrir JellyRoulette';
+        fab.setAttribute('aria-label', 'Abrir JellyRoulette');
+        fab.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+            '<rect x="3" y="3" width="18" height="18" rx="4" fill="currentColor" opacity=".22"/>' +
+            '<rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" stroke-width="1.7"/>' +
+            '<circle cx="8.5" cy="8.5" r="1.6" fill="currentColor"/>' +
+            '<circle cx="15.5" cy="15.5" r="1.6" fill="currentColor"/>' +
+            '<circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg>';
+        fab.addEventListener('click', function () { window.JellyRoulette.open(); });
+        document.body.appendChild(fab);
+
+        // Abrimos la ruleta sola para que la demo sea inmediata.
+        setTimeout(function () { window.JellyRoulette.open(); }, 1000);
+    })();
+</script>
+
+</body>
+</html>
