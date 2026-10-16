@@ -6,11 +6,11 @@ elegido **al azar** entre todos los que cumplen tus filtros.
 
 Para cuando la pregunta no es *«qué veo»* sino *«no sé qué ver»*.
 
-<!-- SUSTITUYE ESTO POR UNA CAPTURA O UN GIF DE LA RULETA GIRANDO.
-     Es lo primero que mira la gente y lo que más instalaciones trae.
-     Guárdala en docs/img/ruleta.png (o enlaza un asset de la release si pesa mucho).
-<p align="center"><img src="docs/img/ruleta.png" width="72%" alt="Ruleta girando"></p>
--->
+
+
+
+<p align="center"><img src="docs/img/ruleta.gif" width="72%" alt="Ruleta girando"></p>
+
 
 ---
 
