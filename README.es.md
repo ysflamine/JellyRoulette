@@ -7,6 +7,8 @@
 
 **Español** · [English](README.md)
 
+![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20ES-orange)
+
 > Plugin para **Jellyfin** que añade un dado en la cabecera de la web. Lo pulsas, eliges género y tipo de medio, y una ruleta 3D de pósters gira hasta detenerse en un título elegido **al azar** entre todos los que cumplen tus filtros.
 >
 > Para cuando la pregunta no es _«qué veo»_, sino _«no sé qué ver»_.
@@ -44,6 +46,7 @@ JellyRoulette te ayuda a descubrir algo que ver desde tu propia biblioteca de Je
 
 - Selector aleatorio de títulos basado en los filtros de tu biblioteca.
 - Animación de ruleta 3D con pósters.
+- Detección automática de idioma: La interfaz se adapta al español o inglés según la configuración del navegador del usuario.
 - Filtros por género, tipo de medio, estado de visionado y biblioteca.
 - Botón con dado en la cabecera y atajo de teclado: `Ctrl` / `⌘` + `Shift` + `J`.
 - Botón flotante de respaldo en móvil.
@@ -51,9 +54,11 @@ JellyRoulette te ayuda a descubrir algo que ver desde tu propia biblioteca de Je
 - API REST para la lógica de la ruleta y los metadatos de la biblioteca.
 - Compilaciones separadas para Jellyfin 12.x y 10.11.x.
 
-## Nota de idioma
+## Soporte de idiomas
 
-Este README está disponible en inglés y español. La interfaz actual del plugin usa etiquetas en español como **Girar**, **Reproducir** y **Ver ficha**. Si más adelante añades textos en inglés o detección del idioma del navegador, actualiza esta sección.
+La interfaz del plugin **detecta automáticamente** el idioma del navegador del usuario y muestra la interfaz en **español** o **inglés**. 
+
+La documentación también está disponible en ambos idiomas mediante el selector en la parte superior de este archivo.
 
 ## Requisitos
 
@@ -137,9 +142,9 @@ https://raw.githubusercontent.com/ysflamine/JellyRoulette/main/manifest-10.11.js
 
 1. Pulsa el **dado 🎲** de la cabecera, o usa el atajo `Ctrl` / `⌘` + `Shift` + `J`.
 2. Ajusta los filtros.
-3. Pulsa **GIRAR**.
+3. Pulsa GIRAR / SPIN (la etiqueta se adapta al idioma de tu navegador).
 4. La ruleta gira y se detiene en el título seleccionado.
-5. En la ficha del resultado puedes **Reproducir**, **Ver ficha** o **Girar otra vez**.
+5. En la ficha del resultado puedes Reproducir / Play, Ver ficha / View details o Girar otra vez / Spin again.
 6. Pulsa `Esc` para cerrar.
 
 En móvil aparece además un **botón flotante** en la esquina inferior derecha.
