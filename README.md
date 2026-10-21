@@ -1,203 +1,271 @@
 # 🎲 JellyRoulette
 
-Plugin para **Jellyfin** que añade un dado en la cabecera de la web. Lo pulsas, eliges
-género y tipo de medio, y una ruleta 3D de pósters gira hasta detenerse en un título
-elegido **al azar** entre todos los que cumplen tus filtros.
-
-Para cuando la pregunta no es *«qué veo»* sino *«no sé qué ver»*.
-
-
 ![CI](https://github.com/ysflamine/JellyRoulette/actions/workflows/build.yml/badge.svg)
-![Jellyfin 12](https://img.shields.io/badge/Jellyfin-12.x-blue)
-![Jellyfin 10.11](https://img.shields.io/badge/Jellyfin-10.11.x-blue)
+![Jellyfin](https://img.shields.io/badge/Jellyfin-12.x%20%7C%2010.11.x-informational)
+![.NET](https://img.shields.io/badge/.NET-10%20%7C%209-512BD4)
+![Docs](https://img.shields.io/badge/docs-English%20%7C%20Espa%C3%B1ol-blue)
 
-<p align="center"><img src="docs/ruleta.gif" width="72%" alt="Ruleta girando"></p>
+🇬 English · [🇪 Español](README.es.md)
 
+> A **Jellyfin** plugin that adds a dice to the web header. Click it, choose a genre and media type, and a 3D roulette of posters spins until it stops on a title selected at random from everything matching your filters.
+>
+> For when the question is not “What should I watch?” but “I don’t know what to watch.”
 
----
+<!-- Optional: add a screenshot or short demo GIF here, e.g. docs/jellyroulette-demo.gif -->
 
-## Requisitos
+## Table of contents
 
-| | |
-|---|---|
-| **Jellyfin** | **12.x** (recomendado) o **10.11.x** |
-| **Navegador** | Cualquiera moderno (PC o móvil) |
-| **Biblioteca** | Alguna con películas y/o series ya escaneada |
+- [Overview](#overview)
+- [Features](#features)
+- [Localization note](#localization-note)
+- [Requirements](#requirements)
+- [Installation](#installation)
+  - [Catalog installation (recommended)](#catalog-installation-recommended)
+  - [Manual installation](#manual-installation)
+- [Updating](#updating)
+- [Usage](#usage)
+  - [Keyboard and mobile](#keyboard-and-mobile)
+  - [Filters](#filters)
+  - [Plugin settings](#plugin-settings)
+- [Troubleshooting](#troubleshooting)
+- [Uninstall](#uninstall)
+- [Development](#development)
+  - [Build from source](#build-from-source)
+  - [Tests](#tests)
+- [API](#api)
+- [Support](#support)
+- [Acknowledgements](#acknowledgements)
 
-Consulta tu versión en **Panel de control → General**, o:
+## Overview
+
+JellyRoulette helps you discover something to watch from your own Jellyfin library. Instead of scrolling endlessly, you define a few filters and let the plugin pick a random title from the matching items.
+
+## Features
+
+- Random title picker based on your library filters.
+- 3D poster roulette animation.
+- Genre, media type, watched state and library filters.
+- Header dice button plus keyboard shortcut: `Ctrl` / `⌘` + `Shift` + `J`.
+- Mobile floating button fallback.
+- Configurable spin duration, poster count, default filters and genre limit.
+- REST API for the roulette logic and library metadata.
+- Separate builds for Jellyfin 12.x and 10.11.x.
+
+## Localization note
+
+This README is available in English and Spanish. The current plugin UI uses Spanish labels such as **Girar**, **Reproducir** and **Ver ficha**. If you add English UI strings later, update this section or implement browser-language detection.
+
+## Requirements
+
+| Requirement | Details |
+| --- | --- |
+| **Jellyfin** | **12.x** (recommended) or **10.11.x** |
+| **Browser** | Any modern browser on desktop or mobile |
+| **Library** | At least one scanned library with movies and/or series |
+
+Check your Jellyfin version in **Control Panel → General**, or run:
 
 ```bash
 curl -s http://localhost:8096/System/Info/Public | grep Version
 ```
 
----
+Replace `localhost:8096` with your Jellyfin address if needed.
 
-## Instalación desde el catálogo (recomendada)
+## Installation
 
-Así el plugin se actualizará solo desde el panel.
+### Catalog installation (recommended)
 
-1. Entra en Jellyfin como **administrador**.
-2. Ve a **Panel de control → Plugins → Repositorios** y pulsa **`+`**.
-3. Rellena:
-   - **Nombre:** `JellyRoulette`
-   - **URL:** la que corresponda a tu versión de Jellyfin 👇
+This method allows the plugin to update from the Jellyfin admin panel.
 
-   **Jellyfin 12.x**
-   ```text
-   https://raw.githubusercontent.com/ysflamine/JellyRoulette/main/manifest.json
-   ```
+1. Sign in to Jellyfin as an **administrator**.
+2. Go to **Control Panel → Plugins → Repositories** and click **`+`**.
+3. Fill in:
+   - **Name:** `JellyRoulette`
+   - **URL:** use the URL matching your Jellyfin version below.
 
-   **Jellyfin 10.11.x**
-   ```text
-   https://raw.githubusercontent.com/ysflamine/JellyRoulette/main/manifest-10.11.json
-   ```
+**Jellyfin 12.x**
 
-4. Guarda, abre la pestaña **Catálogo**, busca **JellyRoulette** (categoría *General*) y pulsa **Instalar**.
-5. **Reinicia el servidor.**
-6. Recarga la web con **`Ctrl + Shift + R`** (recarga dura).
+```text
+https://raw.githubusercontent.com/ysflamine/JellyRoulette/main/manifest.json
+```
 
-> **¿Por qué dos URLs?** Cada rama de Jellyfin necesita una compilación distinta
-> (.NET 10 para la 12.x, .NET 9 para la 10.11.x) y no son intercambiables.
+**Jellyfin 10.11.x**
 
----
+```text
+https://raw.githubusercontent.com/ysflamine/JellyRoulette/main/manifest-10.11.json
+```
 
-## Instalación manual
+4. Save, open the **Catalog** tab, search for **JellyRoulette** under the **General** category and click **Install**.
+5. **Restart the server.**
+6. Hard-refresh the web interface with `Ctrl + Shift + R`.
 
-1. Descarga de **[Releases](../../releases)** el `.zip` de tu rama:
+> [!NOTE]
+> Why two URLs? Each Jellyfin branch requires a different build: .NET 10 for Jellyfin 12.x and .NET 9 for Jellyfin 10.11.x. The binaries are not interchangeable.
+
+### Manual installation
+
+1. Download the `.zip` for your branch from **Releases**:
    - Jellyfin **12.x** → `jellyroulette_12.zip`
    - Jellyfin **10.11.x** → `jellyroulette_10.11.zip`
-2. Extrae los dos archivos (`Jellyfin.Plugin.JellyRoulette.dll` y `meta.json`) en una
-   **subcarpeta llamada `JellyRoulette`** dentro de la carpeta de plugins:
+2. Extract these two files into a **subfolder named `JellyRoulette`** inside the Jellyfin plugins folder:
+   - `Jellyfin.Plugin.JellyRoulette.dll`
+   - `meta.json`
 
-   | Instalación | Ruta |
-   |---|---|
-   | Windows (instalador o servicio) | `C:\ProgramData\Jellyfin\Server\plugins\JellyRoulette\` |
-   | Linux (paquete) | `/var/lib/jellyfin/plugins/JellyRoulette/` |
-   | Docker | `/config/plugins/JellyRoulette/` |
-   | macOS | `~/.local/share/jellyfin/plugins/JellyRoulette/` |
+| Installation type | Plugins path |
+| --- | --- |
+| Windows (installer or service) | `C:\ProgramData\Jellyfin\Server\plugins\JellyRoulette\` |
+| Linux (package) | `/var/lib/jellyfin/plugins/JellyRoulette/` |
+| Docker | `/config/plugins/JellyRoulette/` |
+| macOS | `~/.local/share/jellyfin/plugins/JellyRoulette/` |
 
-3. Reinicia el servidor y recarga la web con `Ctrl + Shift + R`.
+3. Restart the server and hard-refresh the web interface with `Ctrl + Shift + R`.
 
-> ⚠️ La DLL va en una **subcarpeta propia**, no suelta en `plugins/`.
-> ⚠️ En Linux/Docker comprueba los permisos: si el proceso no puede leer la DLL, la ignora en silencio.
+> [!WARNING]
+> The DLL must be inside its own `JellyRoulette` subfolder, not directly under `plugins/`.
 
----
+> [!WARNING]
+> On Linux and Docker, check file permissions. If the Jellyfin process cannot read the DLL, it may ignore the plugin silently.
 
-## Cómo se usa
+## Updating
 
-1. Pulsa el **dado 🎲** de la cabecera (o `Ctrl` / `⌘` + `Shift` + `J`).
-2. Ajusta los filtros:
+- **Catalog installation:** update from **Control Panel → Plugins → Catalog**, restart the server and hard-refresh the web UI.
+- **Manual installation:** download the correct `.zip` for your Jellyfin branch, replace `Jellyfin.Plugin.JellyRoulette.dll` and `meta.json` inside `plugins/JellyRoulette/`, restart the server and hard-refresh the web UI.
 
-   | Filtro | Opciones |
-   |---|---|
-   | **Género** | Chips multi-selección con el nº de títulos de cada uno. Varios géneros se combinan con *O*. |
-   | **Tipo** | Películas · Series · Ambos |
-   | **Estado** | Solo no vistos · Todos |
-   | **Biblioteca** | Todas, o una concreta |
+## Usage
 
-3. Pulsa **GIRAR**. La ruleta gira y frena sobre el elegido.
-4. En la ficha puedes **Reproducir**, **Ver ficha** o **Girar otra vez**.
-5. `Esc` cierra.
+### Keyboard and mobile
 
-En móvil aparece además un **botón flotante** en la esquina inferior derecha.
+1. Click the **dice 🎲** in the header, or press `Ctrl` / `⌘` + `Shift` + `J`.
+2. Adjust the filters.
+3. Click **Spin** (`Girar` in the Spanish UI).
+4. The roulette spins and stops on the selected title.
+5. On the result card you can **Play** (`Reproducir`), **View details** (`Ver ficha`) or **Spin again**.
+6. Press `Esc` to close.
 
-### Ajustes del plugin
+On mobile, a **floating button** also appears in the bottom-right corner.
 
-**Panel de control → Plugins → JellyRoulette → Ajustes**:
+### Filters
 
-| Ajuste | Para qué |
-|---|---|
-| Mostrar JellyRoulette en la interfaz web | Desactiva el botón inyectado (la API sigue funcionando) |
-| Botón flotante | `Automático` (móvil o si la cabecera falla) · `Siempre` · `Nunca` |
-| Tipo de medio por defecto | Con qué filtro abre la ruleta |
-| Filtrar «solo no vistos» por defecto | Idem |
-| Duración del giro (ms) | 1600 – 9000. Más alto = más dramático |
-| Pósters en la ruleta | Cuántos candidatos se descargan por tirada (8 – 60) |
-| Máximo de géneros | Se muestran primero los que tienen más títulos |
+| Filter | Options |
+| --- | --- |
+| **Genre** | Multi-select chips showing the number of titles per genre. Multiple genres are combined with **OR**. |
+| **Type** | Movies · Series · Both |
+| **State** | Only unwatched · All |
+| **Library** | All libraries, or one specific library |
 
-Los cambios se aplican al recargar la web; no hace falta reiniciar el servidor.
+### Plugin settings
 
----
+Go to **Control Panel → Plugins → JellyRoulette → Settings**.
 
-## Solución de problemas
+| Setting | Purpose |
+| --- | --- |
+| Show JellyRoulette in the web interface | Disables the injected header button. The API keeps working. |
+| Floating button | `Automatic` (mobile or if the header button fails) · `Always` · `Never` |
+| Default media type | Filter used when the roulette opens |
+| Filter “only unwatched” by default | Same as above, for watched state |
+| Spin duration (ms) | `1600`–`9000`. Higher values feel more dramatic |
+| Posters in the roulette | Number of candidate posters loaded per spin (`8`–`60`) |
+| Maximum genres | Shows first the genres with more titles |
 
-| Síntoma | Solución |
-|---|---|
-| No aparece en **Panel → Plugins** | La DLL debe estar en `plugins/JellyRoulette/`, no suelta. Revisa permisos de lectura. |
-| Aparece pero no hay dado en la cabecera | `Ctrl + Shift + R`. Si sigue sin salir, activa *Botón flotante → Siempre* en los ajustes. |
-| Estado *Malfunctioned* | Estás usando la DLL de la otra rama de Jellyfin. Descarga el `.zip` correcto. |
-| La ruleta sale vacía («Nada por aquí…») | Ningún título cumple esos filtros: quita géneros o desactiva *solo no vistos*. |
-| La ruleta sale vacía y no tienes géneros | Biblioteca sin escanear o sin metadatos. **Panel → Bibliotecas → Escanear todas**. |
-| Se ven los pósters como cuadros grises | El título no tiene imagen *Primary*. Ponle póster en Jellyfin. |
-| Instalación desde catálogo falla | Mira el log del servidor y busca `JellyRoulette`, `checksum` u `Only zip`. |
-| Tras actualizar, sigue la versión vieja | Recarga dura (`Ctrl + Shift + R`). El navegador cachea `index.html`. |
+Settings changes apply after reloading the web interface. A server restart is not required.
 
-**Dónde está el log:**
+## Troubleshooting
 
-| | Ruta |
-|---|---|
-| Windows | `C:\ProgramData\Jellyfin\Server\log\log_AAAAMMDD.log` |
-| Linux | `/var/log/jellyfin/log_AAAAMMDD.log` |
+| Symptom | Solution |
+| --- | --- |
+| The plugin does not appear in **Control Panel → Plugins** | The DLL must be in `plugins/JellyRoulette/`, not directly in `plugins/`. Check read permissions. |
+| The plugin appears, but there is no dice in the header | Hard-refresh with `Ctrl + Shift + R`. If it still does not appear, set **Floating button → Always** in the plugin settings. |
+| Plugin status is **Malfunctioned** | You are using the DLL built for the other Jellyfin branch. Download the correct `.zip`. |
+| The roulette is empty (for example, “Nada por aquí…”) | No title matches those filters. Remove some genres or disable **Only unwatched**. |
+| The roulette is empty and no genres are shown | The library is not scanned or has no metadata. Go to **Control Panel → Libraries → Scan all**. |
+| Posters appear as gray boxes | The title has no **Primary** image. Add a poster in Jellyfin. |
+| Catalog installation fails | Check the server log and search for `JellyRoulette`, `checksum` or `Only zip`. |
+| The old version is still loaded after updating | Hard-refresh with `Ctrl + Shift + R`. The browser may cache `index.html`. |
+
+**Where is the log?**
+
+| System | Log location |
+| --- | --- |
+| Windows | `C:\ProgramData\Jellyfin\Server\log\log_YYYYMMDD.log` |
+| Linux | `/var/log/jellyfin/log_YYYYMMDD.log` |
 | Docker | `docker logs jellyfin --tail 100` |
 
----
+## Uninstall
 
-## Desinstalar
+Use **Control Panel → Plugins → JellyRoulette → Uninstall**, then restart the server.
 
-**Panel → Plugins → JellyRoulette → Desinstalar**, y reinicia.
+Manual removal:
 
-A mano: borra la carpeta `plugins/JellyRoulette/` y reinicia. Los ajustes viven aparte, en
-`configurations/JellyRoulette_f299f82b-….xml`; bórralo también si quieres empezar de cero.
+1. Delete the folder `plugins/JellyRoulette/`.
+2. Restart Jellyfin.
+3. Optional: delete the settings file from `configurations/JellyRoulette_<guid>.xml` if you want a completely fresh start. The GUID part may vary.
 
----
+## Development
 
-## Compilar desde el código fuente
+### Build from source
 
-| Jellyfin | .NET SDK | Comando |
-|---|---|---|
+| Jellyfin version | .NET SDK | Command |
+| --- | --- | --- |
 | 12.x | 10.0.x | `dotnet publish Jellyfin.Plugin.JellyRoulette -c Release -o publish` |
 | 10.11.x | 9.0.x | `dotnet publish Jellyfin.Plugin.JellyRoulette -c Release -o publish-jf10 -p:JellyfinTarget=jf10` |
 
-Copia `Jellyfin.Plugin.JellyRoulette.dll` y `meta.json` a la carpeta de plugins y reinicia.
-El `.pdb`, el `.xml` y el `.deps.json` no hacen falta.
+Copy `Jellyfin.Plugin.JellyRoulette.dll` and `meta.json` to the plugin folder and restart Jellyfin. The `.pdb`, `.xml` and `.deps.json` files are not required.
 
-Tests:
+### Tests
 
 ```bash
-dotnet test tests/JellyRoulette.Tests        # backend (41 tests)
-cd tests/frontend && npm install && npm test # interfaz (jsdom)
+dotnet test tests/JellyRoulette.Tests        # backend tests
+cd tests/frontend && npm install && npm test # frontend tests (jsdom)
 ```
 
----
+The backend currently has 41 tests, but the exact count may change over time.
 
 ## API
 
-Todas las rutas de datos exigen sesión iniciada (cabecera
-`Authorization: MediaBrowser Token="…"`).
+All data routes require an authenticated Jellyfin session. Send the header:
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| `GET` | `/JellyRoulette/Spin` | Elige un título al azar + pósters para la animación |
-| `GET` | `/JellyRoulette/Genres` | Géneros de la biblioteca con recuentos |
-| `GET` | `/JellyRoulette/Libraries` | Bibliotecas del servidor |
-| `GET` | `/JellyRoulette/Info` | Versión y ajustes activos |
-
-Parámetros de `/Spin`: `mediaType` (`movie`·`series`·`both`), `unwatchedOnly` (`true`),
-`libraryId` (GUID), `genres` (separados por coma, con el nombre interno: `Horror,Comedy`),
-`candidates` (1-60).
-
-```bash
-curl -H "Authorization: MediaBrowser Token=\"TU_TOKEN\"" \
-  "http://localhost:8096/JellyRoulette/Spin?mediaType=movie&unwatchedOnly=true&genres=Horror"
+```http
+Authorization: MediaBrowser Token="YOUR_TOKEN"
 ```
 
-Los archivos estáticos (`/loader.js`, `/roulette.js`, `/roulette.css`) son anónimos, como
-el resto de recursos de la web de Jellyfin. No exponen datos de la biblioteca.
+| Method | Route | Description |
+| --- | --- | --- |
+| `GET` | `/JellyRoulette/Spin` | Picks a random title and returns posters for the animation |
+| `GET` | `/JellyRoulette/Genres` | Returns library genres with title counts |
+| `GET` | `/JellyRoulette/Libraries` | Returns server libraries |
+| `GET` | `/JellyRoulette/Info` | Returns plugin version and active settings |
 
----
+### `/Spin` query parameters
 
-## Licencia
+| Parameter | Type | Notes |
+| --- | --- | --- |
+| `mediaType` | `movie`, `series` or `both` | Media type filter |
+| `unwatchedOnly` | boolean | Use `true` to restrict to unwatched items |
+| `libraryId` | GUID | Optional library id |
+| `genres` | comma-separated strings | Use internal genre names, for example `Horror,Comedy` |
+| `candidates` | integer | Number of candidate posters, normally `1`–`60`; the UI setting uses `8`–`60` |
 
-[GPL-3.0](LICENSE). Al enlazar contra los paquetes NuGet de Jellyfin (GPLv3), el binario
-resultante es GPLv3 por derivación. Es la licencia que el proyecto Jellyfin exige a los
-plugins distribuidos públicamente.
+Example:
+
+```http
+GET /JellyRoulette/Spin?mediaType=movie&unwatchedOnly=true&genres=Horror,Comedy&candidates=24
+```
+
+## Support
+
+If something does not work, open an issue with:
+
+- Jellyfin version.
+- JellyRoulette version.
+- Installation method: catalog or manual.
+- Operating system and deployment type: Windows, Linux, Docker, macOS.
+- Browser and whether you are using desktop or mobile.
+- Relevant server log lines.
+- Steps to reproduce the problem.
+- Expected behavior and actual behavior.
+
+Pull requests are welcome.
+
+## Acknowledgements
+
+Built for [Jellyfin](https://jellyfin.org/). Thanks to the Jellyfin project and community.
