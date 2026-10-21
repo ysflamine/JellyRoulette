@@ -7,6 +7,8 @@
 
 **English** · [Español](README.es.md)
 
+![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20ES-orange)
+
 > A **Jellyfin** plugin that adds a dice to the web header. Click it, choose a genre and media type, and a 3D roulette of posters spins until it stops on a title selected at random from everything matching your filters.
 >
 > For when the question is not “What should I watch?” but “I don’t know what to watch.”
@@ -17,7 +19,7 @@
 
 - [Overview](#overview)
 - [Features](#features)
-- [Localization note](#localization-note)
+- [Language Support](#language-Support)
 - [Requirements](#requirements)
 - [Installation](#installation)
   - [Catalog installation (recommended)](#catalog-installation-recommended)
@@ -44,6 +46,7 @@ JellyRoulette helps you discover something to watch from your own Jellyfin libra
 
 - Random title picker based on your library filters.
 - 3D poster roulette animation.
+- Automatic language detection: The UI adapts to English or Spanish based on the user's browser settings.
 - Genre, media type, watched state and library filters.
 - Header dice button plus keyboard shortcut: `Ctrl` / `⌘` + `Shift` + `J`.
 - Mobile floating button fallback.
@@ -51,9 +54,11 @@ JellyRoulette helps you discover something to watch from your own Jellyfin libra
 - REST API for the roulette logic and library metadata.
 - Separate builds for Jellyfin 12.x and 10.11.x.
 
-## Localization note
+## Language Support
 
-This README is available in English and Spanish. The current plugin UI uses Spanish labels such as **Girar**, **Reproducir** and **Ver ficha**. If you add English UI strings later, update this section or implement browser-language detection.
+The plugin interface **automatically detects** the user's browser language and displays the UI in **English** or **Spanish**.
+
+Documentation is also available in both languages via the selector at the top of this file.
 
 ## Requirements
 
@@ -137,9 +142,9 @@ https://raw.githubusercontent.com/ysflamine/JellyRoulette/main/manifest-10.11.js
 
 1. Click the **dice 🎲** in the header, or press `Ctrl` / `⌘` + `Shift` + `J`.
 2. Adjust the filters.
-3. Click **Spin** (`Girar` in the Spanish UI).
+3. Click **Spin** / **Girar** (the label adapts to your browser language).
 4. The roulette spins and stops on the selected title.
-5. On the result card you can **Play** (`Reproducir`), **View details** (`Ver ficha`) or **Spin again**.
+5. On the result card you can **Play** / **Reproducir**, **View details** / **Ver ficha**, or **Spin again**.
 6. Press `Esc` to close.
 
 On mobile, a **floating button** also appears in the bottom-right corner.
