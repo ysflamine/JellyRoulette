@@ -5,7 +5,7 @@
 ![.NET](https://img.shields.io/badge/.NET-10%20%7C%209-512BD4)
 ![Docs](https://img.shields.io/badge/docs-English%20%7C%20Espa%C3%B1ol-blue)
 
-🇬 English · [🇪 Español](README.es.md)
+**English** · [Español](README.es.md)
 
 > A **Jellyfin** plugin that adds a dice to the web header. Click it, choose a genre and media type, and a 3D roulette of posters spins until it stops on a title selected at random from everything matching your filters.
 >
