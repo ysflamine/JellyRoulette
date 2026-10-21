@@ -11,7 +11,7 @@
 >
 > For when the question is not “What should I watch?” but “I don’t know what to watch.”
 
-<!-- Optional: add a screenshot or short demo GIF here, e.g. docs/jellyroulette-demo.gif -->
+<p align="center"><img src="docs/ruleta.gif" width="72%" alt="Ruleta girando"></p>
 
 ## Table of contents
 
