@@ -5,7 +5,7 @@
 ![.NET](https://img.shields.io/badge/.NET-10%20%7C%209-512BD4)
 ![Docs](https://img.shields.io/badge/docs-English%20%7C%20Espa%C3%B1ol-blue)
 
-[🇬🇧 English](README.md) · 🇪🇸 Español
+**Español** · [English](README.md)
 
 > Plugin para **Jellyfin** que añade un dado en la cabecera de la web. Lo pulsas, eliges género y tipo de medio, y una ruleta 3D de pósters gira hasta detenerse en un título elegido **al azar** entre todos los que cumplen tus filtros.
 >
