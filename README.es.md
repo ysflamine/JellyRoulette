@@ -11,7 +11,7 @@
 >
 > Para cuando la pregunta no es _«qué veo»_, sino _«no sé qué ver»_.
 
-<!-- Opcional: añade aquí una captura o un GIF corto, por ejemplo docs/jellyroulette-demo.gif -->
+<p align="center"><img src="docs/ruleta.gif" width="72%" alt="Ruleta girando"></p>
 
 ## Índice
 
